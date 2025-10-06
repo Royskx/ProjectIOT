@@ -11,7 +11,7 @@ class SimpleGraph:
         if v not in self.adj:
             self.adj[v] = {}
 
-    def add_edge(self, u, v, temps_min = 1, temps_max = 1):
+    def add_edge(self, u, v, temps_min, temps_max):
         """Ajoute une arête u→v avec deux poids (temps_min, temps_max)."""
         self.add_node(u)
         self.add_node(v)
@@ -72,9 +72,7 @@ class SimpleGraph:
             print(f"  {u}: {arrows}")
         print(f"→ {len(self.nodes())} sommets, {len(self.edges())} arêtes\n")
 
-
 g = SimpleGraph(directed=True)
-
 
 for n in range(1, 12):
     g.add_node(n)
@@ -98,4 +96,16 @@ g.add_edge(10, 11, 3, 4)
 
 g.show()
 
-g.show()
+
+def count_routes(graph, start, end):
+    """Compte le nombre de routes de start à end."""
+    def dfs(node, stops):
+        if node == end and stops > 0:
+            return 1
+        count = 0
+        for neighbor in graph.neighbors(node):
+            count += dfs(neighbor, stops + 1)
+        return count
+    return dfs(start, 0)
+
+print("Nombre de routes de 1 à 11 :", count_routes(g, 1, 11))
