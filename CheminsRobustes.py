@@ -96,6 +96,7 @@ g.add_edge(10, 11, 3, 4)
 
 g.show()
 
+#################Partie 1 - Question 1######################
 
 def count_routes(graph, start, end):
     """Compte le nombre de routes de start à end."""
@@ -146,7 +147,7 @@ print("Nombre de routes de 1 à 11 :", count_routes(g, 1, 11))
 
 
 print("Worst case de 1 à 11 :", worst_case_dij(g, 1, 11))"""
-
+#################Partie 1 - Question 2######################
 def worst_case(graph, start, end):
     visited = set()
     topo_order = []
@@ -185,5 +186,49 @@ def worst_case(graph, start, end):
     return path, distances[end]
 
 path, time = worst_case(g, 1, 11)
-print("Plus long chemin de 1 à 11 :", path)
-print("Temps max :", time)
+print("Plus long chemin de 1 à 11 :", path, ". Temps max :", time)
+
+
+#################Partie 2 - Question 1-4######################
+def most_stable_path(graph, start, end):
+    visited = set()
+    topo_order = []
+
+    def dfs(node):
+        visited.add(node)
+        for neighbor in graph.neighbors(node):
+            if neighbor not in visited:
+                dfs(neighbor)
+        topo_order.append(node)
+
+    for node in graph.nodes():
+        if node not in visited:
+            dfs(node)
+    topo_order.reverse()
+
+    distances = {node: float('inf') for node in graph.nodes()}
+    distances[start] = 0
+    precedent = {node: None for node in graph.nodes()}
+
+    for u in topo_order:
+        for v, (tmin, tmax) in graph.neighbors(u).items():
+            marge = tmax - tmin
+            if distances[u] + marge < distances[v]:
+                distances[v] = distances[u] + marge
+                precedent[v] = u
+
+    path = []
+    current = end
+    while current is not None:
+        path.insert(0, current)
+        current = precedent[current]
+
+    if not path or path[0] != start:
+        return None, float('inf')  # Pas de chemin trouvé
+
+    return path, distances[end]
+
+path, marge = most_stable_path(g, 1, 11)
+print("Itinéraire stable (1 → 11) :", path, "Marge de fluctuation minimale :", marge)
+
+
