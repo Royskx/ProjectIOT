@@ -75,12 +75,27 @@ class SimpleGraph:
 
 g = SimpleGraph(directed=True)
 
-g.add_node(1)
-g.add_node(2)
-g.add_node(3)
 
-g.add_edge(1, 2)
-g.add_edge(1, 3)
-g.add_edge(2, 3)
+for n in range(1, 12):
+    g.add_node(n)
+    
+g.add_edge(1, 2, 3, 7)
+g.add_edge(1, 3, 4, 6)
+g.add_edge(1, 4, 3, 8)
+g.add_edge(2, 5, 2, 5)
+g.add_edge(3, 5, 5, 8)
+g.add_edge(3, 6, 4, 6)
+g.add_edge(4, 6, 7, 10)
+g.add_edge(4, 7, 3, 8)
+g.add_edge(5, 8, 4, 9)
+g.add_edge(6, 8, 2, 4)
+g.add_edge(6, 9, 5, 6)
+g.add_edge(7, 9, 2, 4)
+g.add_edge(7, 10, 4, 7)
+g.add_edge(8, 11, 3, 7)
+g.add_edge(9, 11, 3, 6)
+g.add_edge(10, 11, 3, 4)
+
+g.show()
 
 g.show()
