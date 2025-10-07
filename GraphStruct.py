@@ -243,29 +243,29 @@ class SimpleGraph:
         # Stylesheet avec coloration du chemin
         stylesheet = [
             {'selector': 'node',
-             'style': {
-                 'content': 'data(label)',
-                 'background-color': '#4e79a7',
-                 'color': 'white',
-                 'text-valign': 'center',
-                 'text-halign': 'center',
-                 'width': 50,
-                 'height': 50,
-                 'font-size': 14,
-                 'font-weight': 'bold'
-             }},
+            'style': {
+                'content': 'data(label)',
+                'background-color': '#4e79a7',
+                'color': 'white',
+                'text-valign': 'center',
+                'text-halign': 'center',
+                'width': 50,
+                'height': 50,
+                'font-size': 14,
+                'font-weight': 'bold'
+            }},
             {'selector': 'edge',
-             'style': {
-                 'label': 'data(label)',
-                 'curve-style': 'bezier',
-                 'target-arrow-shape': 'vee' if self.directed else 'none',
-                 'line-color': '#34495E',
-                 'target-arrow-color': '#34495E',
-                 'font-size': 16,
-                 'text-background-color': '#FFFFFF',
-                 'text-background-opacity': 0.8,
-                 'text-margin-y': -10,
-                 'color': '#FF5733'
+            'style': {
+                'label': 'data(label)',
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'vee' if self.directed else 'none',
+                'line-color': '#34495E',
+                'target-arrow-color': '#34495E',
+                'font-size': 16,
+                'text-background-color': '#FFFFFF',
+                'text-background-opacity': 0.8,
+                'text-margin-y': -10,
+                'color': '#FF5733'
              }},
         ]
 
