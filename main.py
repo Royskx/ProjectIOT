@@ -1,19 +1,23 @@
-from GraphStruct import create_example_graph, count_routes
+from GraphStruct import  create_example_graph, count_routes
 from Abstract import best_path, cost_min, cost_max, cost_marge
 from NonAbstract import worst_case, most_stable_path
 
-import dash
-from dash import html
-import dash_cytoscape as cyto
 
 g = create_example_graph()
 g.show_colorful()
 #g.draw_plotly()
+g_mean = g.make_converge(n_samples=1000)
+g_mean.show_colorful()
+
 g.draw_dash(port=8050)
 
 
 
 print("Nombre de routes de 1 à 11 :", count_routes(g, 1, 11))
+
+path, val = best_path(g_mean, 1, 11, cost_min, maximize=False)
+print("Itinéraire optimiste :", path, "→ Temps min total :", val)
+g_mean.draw_dash(port=8050, path=path, heuristic_name="Gaussian Path", path_length=val)
 
 print("\nNon-abstract algorithms results:")
 path, time = worst_case(g, 1, 11)

@@ -6,6 +6,8 @@ import dash
 from dash import html
 import dash_cytoscape as cyto
 
+import numpy as np
+import scipy.stats
 
 class SimpleGraph:
     """
@@ -150,68 +152,6 @@ class SimpleGraph:
         plt.subplots_adjust(left=0.05, right=0.95, top=0.90, bottom=0.05)
         plt.show()
         
-        
-        ##################
-    """
-    def draw_plotly(self, filename="graphe_plotly.html"):
-        G = nx.DiGraph() if self.directed else nx.Graph()
-        for u, nbrs in self.adj.items():
-            for v, (tmin, tmax) in nbrs.items():
-                G.add_edge(u, v, label=f"{tmin}-{tmax}")
-
-        pos = nx.spring_layout(G, seed=42)  # layout initial
-
-        edge_x = []
-        edge_y = []
-        edge_labels = []
-        for u, v, data in G.edges(data=True):
-            x0, y0 = pos[u]
-            x1, y1 = pos[v]
-            edge_x += [x0, x1, None]
-            edge_y += [y0, y1, None]
-            edge_labels.append(( (x0+x1)/2, (y0+y1)/2, data['label'] ))
-
-        node_x = [pos[n][0] for n in G.nodes()]
-        node_y = [pos[n][1] for n in G.nodes()]
-
-        node_trace = go.Scatter(
-            x=node_x, y=node_y,
-            mode='markers+text',
-            marker=dict(size=40, color='#4e79a7', line=dict(width=2, color='black')),
-            text=list(G.nodes()),
-            textposition="bottom center",
-            hoverinfo="text"
-        )
-
-        edge_trace = go.Scatter(
-            x=edge_x, y=edge_y,
-            line=dict(width=2, color='#34495E'),
-            hoverinfo='none',
-            mode='lines'
-        )
-
-        edge_labels_trace = go.Scatter(
-            x=[x for x, y, l in edge_labels],
-            y=[y for x, y, l in edge_labels],
-            text=[l for x, y, l in edge_labels],
-            mode='text',
-            textfont=dict(color="black", size=12),
-            hoverinfo='none'
-        )
-
-        fig = go.Figure(data=[edge_trace, edge_labels_trace, node_trace],
-                        layout=go.Layout(
-                            title=f"{'Graphe orienté' if self.directed else 'Graphe non orienté'}",
-                            showlegend=False,
-                            hovermode='closest',
-                            margin=dict(b=20,l=5,r=5,t=40),
-                            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-                        ))
-
-        fig.write_html(filename)
-        print(f"Graphe interactif généré : {filename}")
-        """
     def to_cytoscape_elements(self):
         """Convertit le graphe en format Cytoscape (nodes + edges)."""
         elements = []
@@ -266,7 +206,7 @@ class SimpleGraph:
                 'text-background-opacity': 0.8,
                 'text-margin-y': -10,
                 'color': '#FF5733'
-             }},
+            }},
         ]
 
         for node in path_nodes:
@@ -315,6 +255,37 @@ class SimpleGraph:
         print(f"\nuvrez navigateur à http://127.0.0.1:{port} pour voir le graphe interactif")
         app.run(debug=False, port=port)
     
+    def noisy_edge_mean(self, tmin, tmax, noise_scale, n_samples=1000):
+        mu = np.mean([tmin, tmax])
+        std = (tmax - tmin) / 6
+        # Ajout de bruit à la moyenne
+        mu_bruite = mu + np.random.normal(0, noise_scale * std)
+        # Générer des échantillons de la gaussienne
+        samples = np.random.normal(mu_bruite, std, n_samples)
+        samples = samples[(samples >= tmin) & (samples <= tmax)]
+        # Estimer la nouvelle moyenne
+        if len(samples) == 0:
+            return np.clip(mu_bruite, tmin, tmax)
+        return np.mean(samples)
+
+    def make_converge(self, n_samples=1000):
+        """
+        Pour chaque arête, crée une gaussienne bruitée et estime la moyenne empirique,
+        puis crée un nouveau graphe avec ces valeurs.
+        """
+        g = SimpleGraph(directed=self.directed)
+        noise_scale = np.random.uniform(0, 0.5)
+
+        for u, v, tmin, tmax in self.edges():
+            mean_estimee = self.noisy_edge_mean(tmin, tmax, noise_scale, n_samples)
+            g.add_node(u)
+            g.add_node(v)
+            g.add_edge(u, v, round(mean_estimee,2), round(mean_estimee,2))
+        return g
+            
+            
+            
+        
         ################
 def create_example_graph():
     g = SimpleGraph(directed=True)
