@@ -1,0 +1,5 @@
+networkx
+matplotlib
+dash
+dash-cytoscape
+scipy

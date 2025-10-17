@@ -1,11 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-#import plotly.graph_objects as go
-#from pyvis.network import Network
 import dash
 from dash import html
 import dash_cytoscape as cyto
-
 import numpy as np
 import scipy.stats
 
@@ -23,7 +20,7 @@ class SimpleGraph:
             self.adj[v] = {}
 
     def add_edge(self, u, v, temps_min, temps_max):
-        """Ajoute une arête u→v avec deux poids (temps_min, temps_max)."""
+        """Ajoute une arête u->v avec deux poids (temps_min, temps_max)."""
         self.add_node(u)
         self.add_node(v)
         self.adj[u][v] = (temps_min, temps_max)
@@ -252,7 +249,7 @@ class SimpleGraph:
             ]
         )
 
-        print(f"\nuvrez navigateur à http://127.0.0.1:{port} pour voir le graphe interactif")
+        print(f"\nOuvrez navigateur à http://127.0.0.1:{port} pour voir le graphe interactif")
         app.run(debug=False, port=port)
     
     def noisy_edge_mean(self, tmin, tmax, noise_scale, n_samples=1000):
@@ -283,10 +280,7 @@ class SimpleGraph:
             g.add_edge(u, v, round(mean_estimee,2), round(mean_estimee,2))
         return g
             
-            
-            
-        
-        ################
+
 def create_example_graph():
     g = SimpleGraph(directed=True)
 
