@@ -1,6 +1,6 @@
 import heapq
 from GraphStruct import SimpleGraph
-#heapq is a mini-python implementation of the heap structur which is etremely efficient to
+#heapq is a mini-python implementation of the heap structur which is extremely efficient to
 #estabilish the order in the Dijekstra's algorithm.
 
 #It uses internally the tabular structure, where children of node tab[i] are tab[2*i+1] and
@@ -16,7 +16,8 @@ def best_path(graph, start, end, cost_func, maximize=False):
 
 
     # Dijkstra is a very efficient algorithm in order to calculate the shortest path
-    # In a graph without negative cycles (otherwise it won't halt)
+    # In a graph with positive weighted edges
+    # It may not halt if a negative cycle is contained in the graph
 
     if maximize:
         # For maximization, negate costs to use min-heap
@@ -47,19 +48,21 @@ def best_path(graph, start, end, cost_func, maximize=False):
         #          forall m: vertex. min m heap distances ->
         #          forall x: vertex. forall dx: int. path src x dx ->
         #          dx < d[m] -> mem x visited }
- 
+
+        #       Notice the invariant above wouldn't work if we have negative weighted edges
+        #       that's why Disjkstra's SSP doesn't work on negative weighted edges
+
         #       variant(cardinal V - cardinal visited) 
         #           at each iteration, one node gets pulled
         #           and only gets inside the heap once, therefore
         #           this loop iterates at most Card(V) times
 
         #       The overall complexity is O(E + VlogV) that's because
-        #       Each edge is seen twice, once to mark the node to which it
-        #       points and another time to check if it's already visited,
-        #       since each node is pushed once and pulled once from the heap 
-        #       we get 2*VlogV since the heap is logarithmic, therefore, the
-        #       complexity is actually theta(2E + 2VlogV), with big O it becomes
-        #       O(E + VlogV)    
+        #       Each edge is seen at least once to check or to mark ifthe node 
+        #       to which it points is visited since each node is pushed once and 
+        #       pulled once from the heap we get O(VlogV) operations since we used
+        #       the heap structure which gives us the logarithmic insertions and retrievals
+        #       where the global complexity is O(E+VlogV)
 
         current_dist, u = heapq.heappop(heap)
         current_dist *= multiplier  # Convert back to actual distance
