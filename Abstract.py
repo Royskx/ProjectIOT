@@ -7,6 +7,14 @@ from GraphStruct import SimpleGraph
 #tab[2*i+2]
 
 def best_path(graph, start, end, cost_func, maximize=False):
+    # The specification:
+    # requires { start, end are in graph }
+    # ensures  { forall v: vertex. distances[v] <> inf ->
+    #             shortest_path src v d[v] } correction
+    # ensures  { forall v: vertex. distances[v] == inf ->
+    #             forall dv: int. not path src v dv } complétude
+
+
     # Dijkstra is a very efficient algorithm in order to calculate the shortest path
     # In a graph without negative cycles (otherwise it won't halt)
 
@@ -34,6 +42,25 @@ def best_path(graph, start, end, cost_func, maximize=False):
     visited = set()
     
     while heap:
+        # Invariants and variants
+        #       invariant { (* vertices at distance < min(heap) are already in visited *)
+        #          forall m: vertex. min m heap distances ->
+        #          forall x: vertex. forall dx: int. path src x dx ->
+        #          dx < d[m] -> mem x visited }
+ 
+        #       variant(cardinal V - cardinal visited) 
+        #           at each iteration, one node gets pulled
+        #           and only gets inside the heap once, therefore
+        #           this loop iterates at most Card(V) times
+
+        #       The overall complexity is O(E + VlogV) that's because
+        #       Each edge is seen twice, once to mark the node to which it
+        #       points and another time to check if it's already visited,
+        #       since each node is pushed once and pulled once from the heap 
+        #       we get 2*VlogV since the heap is logarithmic, therefore, the
+        #       complexity is actually theta(2E + 2VlogV), with big O it becomes
+        #       O(E + VlogV)    
+
         current_dist, u = heapq.heappop(heap)
         current_dist *= multiplier  # Convert back to actual distance
         
@@ -60,6 +87,8 @@ def best_path(graph, start, end, cost_func, maximize=False):
         
         # We take out the shortest path we have at this moment in the heap, then, we expand it 
         for v, (tmin, tmax) in graph.neighbors(u).items():
+            # Invariants and variants
+            #   invariant()
             cost = cost_func(u, v, tmin, tmax)
             new_distance = distances[u] + cost
             
