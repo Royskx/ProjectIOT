@@ -98,6 +98,8 @@ def cost_max(u, v, tmin, tmax):
 def cost_marge(u, v, tmin, tmax):
     return tmax - tmin
 
+
+#=================================== tests =====================================
 def test_dense_graph():
     """Test 10: Graphe dense avec plusieurs alternatives"""
     g = SimpleGraph(directed=True)

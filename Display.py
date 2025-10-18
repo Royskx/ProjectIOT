@@ -2,7 +2,35 @@ import dash
 from dash import html, dcc, Input, Output, State
 import dash_cytoscape as cyto
 from Abstract import best_path, cost_min, cost_max, cost_marge
-from NonAbstract import worst_case, most_stable_path
+
+def show_colorful(g):
+    """Affichage coloré et lisible dans la console."""
+    BOLD = "\033[1m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+
+    title = f"{BOLD}{CYAN}{'Graphe orienté' if g.directed else 'Graphe non orienté'}{RESET}"
+    print("╭" + "─" * 60 + "╮")
+    print(f"│ {title:<57} │")
+    print("├" + "─" * 60 + "┤")
+
+    for u, nbrs in g.adj.items():
+        if not nbrs:
+            print(f"│ {YELLOW}{u:<15}{RESET} │ (aucun voisin)")
+            continue
+
+        print(f"│ {YELLOW}{u:<15}{RESET} │ ", end="")
+        rels = []
+        for v, (tmin, tmax) in nbrs.items():
+            arrow = "→" if g.directed else "—"
+            rels.append(f"{v} {arrow} [{tmin}-{tmax}]")
+        print(", ".join(rels))
+    print("╰" + "─" * 60 + "╯")
+
+    print(f"{GREEN}Sommets:{RESET} {len(g.nodes())} | {GREEN}Arêtes:{RESET} {len(g.edges())}\n")
+
 
 def create_interactive_dashboard(graph, start, end, port=8050):
     """

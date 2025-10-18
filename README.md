@@ -1,8 +1,26 @@
-# ProjectIOT
+# Robustesse dans les graphes
+Vous trouverez le lien au document de réponses ci-dessous :
 
-Vous trouverez le lien au documents de réponses en ci-dessous.
-
-.DOCX
+**Format .DOCX**  
 https://docs.google.com/document/d/1FkdVHkOsLSLxm0ZnttG3Ms8LlBLZvWaAbwbzPVxLCf8/edit?usp=sharing
-.TEX
-https://fr.overleaf.com/8521835443rxqxhjxhdkrr#756c30
+
+---
+
+## Structure du Projet
+
+Le projet est organisé en plusieurs fichiers, chacun ayant un rôle bien défini :
+
+### Display.py
+Ce fichier regroupe les différentes fonctions d'affichage. On y trouve des sorties sur le terminal, mais aussi des visualisations en HTML interactif qui permettent de voir clairement les graphes, les chemins calculés et les différentes approches testées.
+
+### Main.py
+C'est le point d'entrée du projet. Il construit le graphe donné dans l'énoncé et lance le serveur d'affichage pour visualiser les résultats.
+
+### GraphStruct.py
+Ici on retrouve toute la structure de graphe. Ce fichier contient les fonctions qui permettent de manipuler le graphe et d'extraire les informations dont on a besoin pour les algorithmes.
+
+### Abstract.py
+C'est le cœur du projet. On y trouve l'algorithme de parcours abstrait qui fonctionne même sur des graphes cycliques. Il contient aussi quelques fonctions de comparaison et une fonction du premier ordre qui optimise le chemin selon la fonction de comparaison qu'on lui passe en paramètres. Vers la fin, il y a une petite fonction de tests. L'algorithme de parcours est bien annoté avec la spécification logique qui permet de démontrer sa correction.
+
+### NonAbstract.py
+C'est un peu l'alpha du projet. On y garde l'ancienne version de l'algorithme, histoire de voir d'où on vient et comment ça a évolué.

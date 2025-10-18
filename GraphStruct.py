@@ -1,10 +1,4 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-import dash
-from dash import html
-import dash_cytoscape as cyto
 import numpy as np
-import scipy.stats
 
 class SimpleGraph:
     """
@@ -65,49 +59,21 @@ class SimpleGraph:
     def degree(self, v):
         return len(self.adj.get(v, {}))
 
-    def show_colorful(self):
-        """Affichage coloré et lisible dans la console."""
-        BOLD = "\033[1m"
-        CYAN = "\033[96m"
-        GREEN = "\033[92m"
-        YELLOW = "\033[93m"
-        RESET = "\033[0m"
-
-        title = f"{BOLD}{CYAN}{'Graphe orienté' if self.directed else 'Graphe non orienté'}{RESET}"
-        print("╭" + "─" * 60 + "╮")
-        print(f"│ {title:<57} │")
-        print("├" + "─" * 60 + "┤")
-
-        for u, nbrs in self.adj.items():
-            if not nbrs:
-                print(f"│ {YELLOW}{u:<15}{RESET} │ (aucun voisin)")
-                continue
-
-            print(f"│ {YELLOW}{u:<15}{RESET} │ ", end="")
-            rels = []
-            for v, (tmin, tmax) in nbrs.items():
-                arrow = "→" if self.directed else "—"
-                rels.append(f"{v} {arrow} [{tmin}-{tmax}]")
-            print(", ".join(rels))
-        print("╰" + "─" * 60 + "╯")
-
-        print(f"{GREEN}Sommets:{RESET} {len(self.nodes())} | {GREEN}Arêtes:{RESET} {len(self.edges())}\n")
-    
     def noisy_edge_mean_gauss(self, tmin, tmax, noise_scale=1.0, n_samples=1000):
         """
         Utilise Beta pour créer des gaussiennes décentrées de façon contrôlée
         """
-        # Choisir aléatoirement un "profil" de trafic
+        # Choisir aléatoirement la densité de trafic
         profile = np.random.choice(['fluide', 'normal', 'dense'])
         
         if profile == 'fluide':
-            # Trafic fluide → pic vers tmin
+            # Trafic fluide => pic vers tmin
             alpha, beta = 2, 5
         elif profile == 'dense':
-            # Trafic dense → pic vers tmax
+            # Trafic dense => pic vers tmax
             alpha, beta = 5, 2
         else:
-            # Normal → pic au centre
+            # Normal => pic au centre
             alpha, beta = 2, 2
 
         # Générer la position du centre
@@ -185,8 +151,10 @@ class SimpleGraph:
 
     def make_converge(self, beta = False, n_samples=1000):
         """
-        Pour chaque arête, crée une gaussienne bruitée et estime la moyenne empirique,
-        puis crée un nouveau graphe avec ces valeurs.
+        Pour chaque arête, crée une gaussienne bruitée ou une distribution beta
+        et estime la moyenne empirique, ces lois simule la circulation des vehiécules 
+        en temps réel.
+        On renvoies un nouveau graphe avec ces valeurs.
         """
         g = SimpleGraph(directed=self.directed)
         noise_scale = np.random.uniform(0, 0.5)
@@ -229,9 +197,8 @@ def create_example_graph():
 
 
 #################Partie 1 - Question 1######################
-
 def count_routes(graph, start, end):
-    """Compte le nombre de routes de start à end."""
+    """Compte le nombre de routes de start à end, seulement sur les graphs acycliques."""
     def dfs(node, stops):
         if node == end and stops > 0:
             return 1
@@ -241,11 +208,14 @@ def count_routes(graph, start, end):
         return count
     return dfs(start, 0)
 
-
-
-
 """
 Unused Codes
+#import networkx as nx
+#import matplotlib.pyplot as plt
+#import dash
+#from dash import html
+#import dash_cytoscape as cyto
+#import scipy.stats
 
     def show(self):
             print(f"{'Graphe orienté' if self.directed else 'Graphe non orienté'} :")

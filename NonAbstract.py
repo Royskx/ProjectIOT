@@ -1,5 +1,5 @@
 #################Partie 1 - Question 2######################
-def worst_case(graph, start, end):
+'''def worst_case(graph, start, end):
     visited = set()
     topo_order = []
 
@@ -78,3 +78,4 @@ def most_stable_path(graph, start, end):
 
     return path, distances[end]
 
+'''
