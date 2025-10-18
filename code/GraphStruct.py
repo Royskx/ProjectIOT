@@ -168,6 +168,99 @@ class SimpleGraph:
             g.add_node(v)
             g.add_edge(u, v, round(mean_estimee,2), round(mean_estimee,2))
         return g
+
+    # ------------------------------------------------------------------
+    # Constructeurs alternatifs et utilitaires
+    # ------------------------------------------------------------------
+    @classmethod
+    def from_edge_list(cls, edges, directed=False, default_weight=(1, 1)):
+        """Construire un SimpleGraph à partir d'un itérable d'arêtes.
+
+        Chaque élément de `edges` peut être :
+          - (u, v, tmin, tmax)
+          - (u, v, w)  -> tmin = tmax = w
+          - (u, v)     -> tmin, tmax = default_weight
+        """
+        g = cls(directed=directed)
+        for e in edges:
+            if len(e) >= 4:
+                u, v, tmin, tmax = e[0], e[1], e[2], e[3]
+            elif len(e) == 3:
+                u, v, w = e
+                tmin = tmax = w
+            elif len(e) == 2:
+                u, v = e
+                tmin, tmax = default_weight
+            else:
+                # skip malformed entries
+                continue
+            g.add_edge(u, v, tmin, tmax)
+        return g
+
+    @classmethod
+    def from_adj_dict(cls, adj_dict, directed=False):
+        """Construire un SimpleGraph à partir d'un dictionnaire de dictionnaires
+        représentant la structure d'adjacence.
+
+        On s'attend à ce que adj_dict[u][v] soit soit un tuple (tmin, tmax),
+        soit une seule valeur (dans ce cas tmin = tmax).
+        """
+        g = cls(directed=directed)
+        for u, nbrs in adj_dict.items():
+            for v, w in nbrs.items():
+                if isinstance(w, (tuple, list)) and len(w) >= 2:
+                    tmin, tmax = w[0], w[1]
+                else:
+                    tmin = tmax = w
+                g.add_edge(u, v, tmin, tmax)
+        return g
+
+    @classmethod
+    def from_dataframe(cls, df, u_col='u', v_col='v', tmin_col='tmin', tmax_col='tmax', directed=False):
+        """Construire un SimpleGraph à partir d'un DataFrame pandas contenant les arêtes en ligne.
+
+        Le DataFrame doit comporter des colonnes pour la source et la destination et au moins une colonne de poids.
+        Si `tmax_col` est absente, la valeur de `tmin_col` est utilisée pour les deux poids.
+        """
+        try:
+            import pandas as _pd  # optional dependency
+        except Exception:
+            _pd = None
+        if _pd is None:
+            raise RuntimeError('pandas is required to build a graph from a DataFrame')
+        if not set([u_col, v_col]).issubset(df.columns):
+            raise ValueError(f'DataFrame must contain columns {u_col} and {v_col}')
+
+        g = cls(directed=directed)
+        for _, row in df.iterrows():
+            u = row[u_col]
+            v = row[v_col]
+            if tmin_col in df.columns:
+                tmin = row[tmin_col]
+            elif 'weight' in df.columns:
+                tmin = row['weight']
+            else:
+                raise ValueError('No weight column found (expected tmin or weight)')
+
+            if tmax_col in df.columns:
+                tmax = row[tmax_col]
+            else:
+                tmax = tmin
+
+            g.add_edge(u, v, tmin, tmax)
+        return g
+
+    def relabel_to_ints(self, start=1):
+        """Return a new graph with nodes relabeled to consecutive integers starting at `start`.
+
+        Returns (new_graph, mapping) where mapping maps old_label -> new_int.
+        """
+        nodes = list(self.nodes())
+        mapping = {old: i for i, old in enumerate(nodes, start)}
+        g = SimpleGraph(directed=self.directed)
+        for u, v, tmin, tmax in self.edges():
+            g.add_edge(mapping[u], mapping[v], tmin, tmax)
+        return g, mapping
             
 
 def create_example_graph():

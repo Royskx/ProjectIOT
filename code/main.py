@@ -1,10 +1,39 @@
-from GraphStruct import  create_example_graph, count_routes
+from GraphStruct import create_example_graph, count_routes, SimpleGraph
 from Display import show_all_heuristics, show_colorful
 
+
+# Example A: existing example graph
 g = create_example_graph()
-#=========================================== display in terminal =========================================
+print("Example graph: show colorful output and count routes")
 show_colorful(g)
 print("Nombre de routes de 1 à 11 :", count_routes(g, 1, 11))
+
+
+# Example B: construct from an edge list (flexible formats)
+edge_list = [
+	("A", "B", 2, 5),
+	("B", "C", 3),        # single weight -> both tmin=tmax
+	("C", "D"),         # no weights -> uses default
+]
+g2 = SimpleGraph.from_edge_list(edge_list, directed=True, default_weight=(1, 1))
+print("Constructed graph from edge list with nodes:", g2.nodes())
+show_colorful(g2)
+
+
+# Example C: build from an adjacency dict
+adj = {
+	"x": {"y": (3, 7), "z": 4},  # mixed tuple and scalar
+	"y": {"z": (2, 6)},
+}
+g3 = SimpleGraph.from_adj_dict(adj, directed=False)
+print("Graph from adj dict edges:", g3.edges())
+show_colorful(g3)
+
+
+# Optionally relabel to consecutive integers (useful for some algorithms/visualizers)
+g3_int, mapping = g3.relabel_to_ints(start=1)
+print("Relabeled nodes mapping:", mapping)
+
 
 #========================================= interactive HTML display ======================================
 show_all_heuristics(g, 1, 11, port=8050)
