@@ -65,21 +65,6 @@ class SimpleGraph:
     def degree(self, v):
         return len(self.adj.get(v, {}))
 
-    def show(self):
-        print(f"{'Graphe orienté' if self.directed else 'Graphe non orienté'} :")
-        for u, nbrs in self.adj.items():
-            if self.directed:
-                arrows = ", ".join(
-                    f"→ {v} ({tmin}-{tmax})" for v, (tmin, tmax) in nbrs.items()
-                )
-            else:
-                arrows = ", ".join(
-                    f"{v} ({tmin}-{tmax})" for v, (tmin, tmax) in nbrs.items()
-                )
-            print(f"  {u}: {arrows}")
-        print(f"→ {len(self.nodes())} sommets, {len(self.edges())} arêtes\n")
-
-
     def show_colorful(self):
         """Affichage coloré et lisible dans la console."""
         BOLD = "\033[1m"
@@ -108,9 +93,130 @@ class SimpleGraph:
 
         print(f"{GREEN}Sommets:{RESET} {len(self.nodes())} | {GREEN}Arêtes:{RESET} {len(self.edges())}\n")
     
-    
+    def noisy_edge_mean(self, tmin, tmax, noise_scale=1.0, n_samples=1000):
+        """
+        Utilise Beta pour créer des gaussiennes décentrées de façon contrôlée
+        """
+        # Choisir aléatoirement un "profil" de trafic
+        profile = np.random.choice(['fluide', 'normal', 'dense'])
+        
+        if profile == 'fluide':
+            # Trafic fluide → pic vers tmin
+            alpha, beta = 2, 5
+        elif profile == 'dense':
+            # Trafic dense → pic vers tmax
+            alpha, beta = 5, 2
+        else:
+            # Normal → pic au centre
+            alpha, beta = 2, 2
+        
+        # Générer la position du centre
+        beta_sample = np.random.beta(alpha, beta)
+        mu = tmin + beta_sample * (tmax - tmin)
+        
+        # Écart-type
+        std = (tmax - tmin) / (5 + noise_scale)
+        
+        # Générer échantillons
+        samples = np.random.normal(mu, std, n_samples)
+        samples = samples[(samples >= tmin) & (samples <= tmax)]
+        
+        if len(samples) == 0:
+            return mu
+        
+        return np.mean(samples)
+
+    def make_converge(self, n_samples=1000):
+        """
+        Pour chaque arête, crée une gaussienne bruitée et estime la moyenne empirique,
+        puis crée un nouveau graphe avec ces valeurs.
+        """
+        g = SimpleGraph(directed=self.directed)
+        noise_scale = np.random.uniform(0, 0.5)
+
+        for u, v, tmin, tmax in self.edges():
+            mean_estimee = self.noisy_edge_mean(tmin, tmax, noise_scale, n_samples)
+            g.add_node(u)
+            g.add_node(v)
+            g.add_edge(u, v, round(mean_estimee,2), round(mean_estimee,2))
+        return g
+            
+
+def create_example_graph():
+    g = SimpleGraph(directed=True)
+
+    for n in range(1, 12):
+        g.add_node(n)
+        
+    g.add_edge(1, 2, 3, 7)
+    g.add_edge(1, 3, 4, 6)
+    g.add_edge(1, 4, 3, 8)
+    g.add_edge(2, 5, 2, 5)
+    g.add_edge(3, 5, 5, 8)
+    g.add_edge(3, 6, 4, 6)
+    g.add_edge(4, 6, 7, 10)
+    g.add_edge(4, 7, 3, 8)
+    g.add_edge(5, 8, 4, 9)
+    g.add_edge(6, 8, 2, 4)
+    g.add_edge(6, 9, 5, 6)
+    g.add_edge(7, 9, 2, 4)
+    g.add_edge(7, 10, 4, 7)
+    g.add_edge(8, 11, 3, 7)
+    g.add_edge(9, 11, 3, 6)
+    g.add_edge(10, 11, 3, 4)
+
+    return g
+
+
+#################Partie 1 - Question 1######################
+
+def count_routes(graph, start, end):
+    """Compte le nombre de routes de start à end."""
+    def dfs(node, stops):
+        if node == end and stops > 0:
+            return 1
+        count = 0
+        for neighbor in graph.neighbors(node):
+            count += dfs(neighbor, stops + 1)
+        return count
+    return dfs(start, 0)
+
+
+
+
+"""
+Unused Codes
+
+    def show(self):
+            print(f"{'Graphe orienté' if self.directed else 'Graphe non orienté'} :")
+            for u, nbrs in self.adj.items():
+                if self.directed:
+                    arrows = ", ".join(
+                        f"→ {v} ({tmin}-{tmax})" for v, (tmin, tmax) in nbrs.items()
+                    )
+                else:
+                    arrows = ", ".join(
+                        f"{v} ({tmin}-{tmax})" for v, (tmin, tmax) in nbrs.items()
+                    )
+                print(f"  {u}: {arrows}")
+            print(f"→ {len(self.nodes())} sommets, {len(self.edges())} arêtes\n")
+
+    def noisy_edge_mean(self, tmin, tmax, noise_scale, n_samples=1000):
+        mu = np.mean([tmin, tmax])
+        std = (tmax - tmin) / 6
+        # Ajout de bruit à la moyenne
+        mu_bruite = mu + np.random.normal(0, noise_scale * std)
+        # Générer des échantillons de la gaussienne
+        samples = np.random.normal(mu_bruite, std, n_samples)
+        samples = samples[(samples >= tmin) & (samples <= tmax)]
+        # Estimer la nouvelle moyenne
+        if len(samples) == 0:
+            return np.clip(mu_bruite, tmin, tmax)
+        return np.mean(samples)
+
+
     def draw(self, layout="spring"):
-        """Dessine le graphe joliment, avec choix du layout."""
+        Dessine le graphe joliment, avec choix du layout.
         G = nx.DiGraph() if self.directed else nx.Graph()
 
         for u, nbrs in self.adj.items():
@@ -148,9 +254,13 @@ class SimpleGraph:
         plt.axis("off")
         plt.subplots_adjust(left=0.05, right=0.95, top=0.90, bottom=0.05)
         plt.show()
-        
+    
+"""
+
+
+"""
     def to_cytoscape_elements(self):
-        """Convertit le graphe en format Cytoscape (nodes + edges)."""
+        Convertit le graphe en format Cytoscape (nodes + edges).
         elements = []
         # Nodes
         for node in self.adj:
@@ -251,71 +361,4 @@ class SimpleGraph:
 
         print(f"\nOuvrez navigateur à http://127.0.0.1:{port} pour voir le graphe interactif")
         app.run(debug=False, port=port)
-    
-    def noisy_edge_mean(self, tmin, tmax, noise_scale, n_samples=1000):
-        mu = np.mean([tmin, tmax])
-        std = (tmax - tmin) / 6
-        # Ajout de bruit à la moyenne
-        mu_bruite = mu + np.random.normal(0, noise_scale * std)
-        # Générer des échantillons de la gaussienne
-        samples = np.random.normal(mu_bruite, std, n_samples)
-        samples = samples[(samples >= tmin) & (samples <= tmax)]
-        # Estimer la nouvelle moyenne
-        if len(samples) == 0:
-            return np.clip(mu_bruite, tmin, tmax)
-        return np.mean(samples)
-
-    def make_converge(self, n_samples=1000):
-        """
-        Pour chaque arête, crée une gaussienne bruitée et estime la moyenne empirique,
-        puis crée un nouveau graphe avec ces valeurs.
-        """
-        g = SimpleGraph(directed=self.directed)
-        noise_scale = np.random.uniform(0, 0.5)
-
-        for u, v, tmin, tmax in self.edges():
-            mean_estimee = self.noisy_edge_mean(tmin, tmax, noise_scale, n_samples)
-            g.add_node(u)
-            g.add_node(v)
-            g.add_edge(u, v, round(mean_estimee,2), round(mean_estimee,2))
-        return g
-            
-
-def create_example_graph():
-    g = SimpleGraph(directed=True)
-
-    for n in range(1, 12):
-        g.add_node(n)
-        
-    g.add_edge(1, 2, 3, 7)
-    g.add_edge(1, 3, 4, 6)
-    g.add_edge(1, 4, 3, 8)
-    g.add_edge(2, 5, 2, 5)
-    g.add_edge(3, 5, 5, 8)
-    g.add_edge(3, 6, 4, 6)
-    g.add_edge(4, 6, 7, 10)
-    g.add_edge(4, 7, 3, 8)
-    g.add_edge(5, 8, 4, 9)
-    g.add_edge(6, 8, 2, 4)
-    g.add_edge(6, 9, 5, 6)
-    g.add_edge(7, 9, 2, 4)
-    g.add_edge(7, 10, 4, 7)
-    g.add_edge(8, 11, 3, 7)
-    g.add_edge(9, 11, 3, 6)
-    g.add_edge(10, 11, 3, 4)
-
-    return g
-
-
-#################Partie 1 - Question 1######################
-
-def count_routes(graph, start, end):
-    """Compte le nombre de routes de start à end."""
-    def dfs(node, stops):
-        if node == end and stops > 0:
-            return 1
-        count = 0
-        for neighbor in graph.neighbors(node):
-            count += dfs(neighbor, stops + 1)
-        return count
-    return dfs(start, 0)
+"""

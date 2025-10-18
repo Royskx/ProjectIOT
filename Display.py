@@ -17,7 +17,7 @@ def create_interactive_dashboard(graph, start, end, port=8050):
     
     try:
         path, val = best_path(graph, start, end, cost_min, maximize=False)
-        heuristics['optimistic'] = {
+        heuristics['Optimistic'] = {
             'name': '🌟 Optimiste (temps min)',
             'path': path,
             'value': val,
@@ -49,7 +49,18 @@ def create_interactive_dashboard(graph, start, end, port=8050):
         heuristics['stable'] = None
     
     try:
-        path, val = worst_case(graph, start, end)
+        path, val = best_path(graph, start, end, cost_marge, maximize=True)
+        heuristics['Least stable'] = {
+            'name': '⚖️ Least Stable (marge max)',
+            'path': path,
+            'value': val,
+            'description': f'Marge de fluctuation: {val:.2f} min'
+        }
+    except:
+        heuristics['Least stable'] = None
+    
+    try:
+        path, val = best_path(graph, start, end, cost_max, maximize=True)
         heuristics['worst'] = {
             'name': '💀 Pire cas (max-max)',
             'path': path,
@@ -268,8 +279,8 @@ def create_interactive_dashboard(graph, start, end, port=8050):
             # État initial
             elements, stylesheet = get_cytoscape_elements(None)
             info = html.Div([
-                html.H3("👈 Sélectionnez une heuristique pour commencer", 
-                       style={'color': '#7F8C8D', 'textAlign': 'center'})
+                html.H3("Sélectionnez une heuristique pour commencer", 
+                    style={'color': '#7F8C8D', 'textAlign': 'center'})
             ])
             return elements, stylesheet, info, None
         
@@ -301,10 +312,10 @@ def create_interactive_dashboard(graph, start, end, port=8050):
         return dash.no_update, dash.no_update, dash.no_update, current_selection
     
     print(f"\n{'='*60}")
-    print(f"🚀 Dashboard lancé sur http://127.0.0.1:{port}")
+    print(f"Dashboard lancé sur http://127.0.0.1:{port}")
     print(f"{'='*60}")
-    print(f"✨ Heuristiques disponibles: {len([h for h in heuristics.values() if h])}")
-    print(f"📊 Cliquez sur les boutons pour explorer les différents chemins")
+    print(f"Heuristiques disponibles: {len([h for h in heuristics.values() if h])}")
+    print(f"Cliquez sur les boutons pour explorer les différents chemins")
     print(f"{'='*60}\n")
     
     app.run(debug=False, port=port)

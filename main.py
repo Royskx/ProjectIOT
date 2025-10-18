@@ -7,6 +7,8 @@ g = create_example_graph()
 g.show_colorful()
 
 show_all_heuristics(g, 1, 11, port=8050)
+
+
 #g = create_example_graph()
 #g.show_colorful()
 ##g.draw_plotly()
