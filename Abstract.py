@@ -1,4 +1,5 @@
 import heapq
+from GraphStruct import Simple
 #heapq is a mini-python implementation of the heap structur which is etremely efficient to
 #estabilish the order in the Dijekstra's algorithm.
 
@@ -41,11 +42,13 @@ def best_path(graph, start, end, cost_func, maximize=False):
         
         visited.add(u)
         
+
         # The intuition behind Dijkstra: imagine releasing tourists at a specific point on
         # the map. Each node will be reached first by tourists taking the shortest path to it.
-        # In other words, the first time we visit a node is via the shortest path leading
-        # to it. This explains why we can stop the moment we reach the destination node,
-        # at that moment we've already found the shortest path to it.
+        # In other words, when we pull a node out of the heap, means that all the tourists have 
+        # Walked more than the shortest distance fomr the source to that node, therefore
+        # the distance at that node is actually minimal. This explains why we can stop the moment
+        # we pull out the destination node, at that moment we've already found the shortest path to it.
         if u == end:
             break
         
@@ -68,8 +71,6 @@ def best_path(graph, start, end, cost_func, maximize=False):
                     # from the smallest to the greatest, this wouldn't interfere with negative cycles
                     # because when we pull out nodes of the heap, we use their positive distances as above.
             else:
-                # the update of a distance to a node is performed at most once. It's a consequence
-                # of what we have discussed earlier about tourists.
                 if new_distance < distances[v]:
                     distances[v] = new_distance
                     precedent[v] = u
@@ -96,3 +97,24 @@ def cost_max(u, v, tmin, tmax):
 
 def cost_marge(u, v, tmin, tmax):
     return tmax - tmin
+
+def test_dense_graph():
+    """Test 10: Graphe dense avec plusieurs alternatives"""
+    g = SimpleGraph(directed=True)
+    nodes = ['A', 'B', 'C', 'D', 'E']
+    # Créer un graphe complet avec des coûts variables
+    g.add_edge('A', 'B', 1, 3)
+    g.add_edge('A', 'C', 4, 8)
+    g.add_edge('A', 'D', 7, 12)
+    g.add_edge('B', 'C', 2, 4)
+    g.add_edge('B', 'E', 10, 15)
+    g.add_edge('C', 'D', 1, 2)
+    g.add_edge('C', 'E', 5, 9)
+    g.add_edge('D', 'E', 1, 3)
+    
+    path, dist = best_path(g, 'A', 'E', cost_min)
+    assert path == ['A', 'B', 'C', 'D', 'E'], f"Got {path}"
+    assert dist == 5, f"Expected 5 (1+2+1+1), got {dist}"
+    print("✓ Test 10 passed: Dense graph")
+
+test_dense_graph()

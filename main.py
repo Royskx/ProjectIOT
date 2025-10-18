@@ -5,9 +5,14 @@ from NonAbstract import worst_case, most_stable_path
 
 g = create_example_graph()
 g.show_colorful()
-#g.draw_plotly()
+
 g_mean = g.make_converge(n_samples=1000)
 g_mean.show_colorful()
+
+# Itinéraire pire cas (plus long chemin, maximisant le temps max)
+path, val = best_path(g, 1, 11, cost_max, maximize=True)
+print("Pire Itinéraire :", path, "→ Temps max total :", val)
+g.draw_dash(port=8050, path=path, heuristic_name="Worst Path", path_length=val)
 
 g.draw_dash(port=8050)
 
@@ -49,7 +54,4 @@ path, val = best_path(g, 1, 11, cost_marge, maximize=False)
 print("Itinéraire stable :", path, "→ Marge totale :", val)
 g.draw_dash(port=8050, path=path, heuristic_name="Stable Path", path_length=val)
 
-# Itinéraire pire cas (plus long chemin, maximisant le temps max)
-path, val = best_path(g, 1, 11, cost_max, maximize=True)
-print("Pire Itinéraire :", path, "→ Temps max total :", val)
-g.draw_dash(port=8050, path=path, heuristic_name="Worst Path", path_length=val)
+
