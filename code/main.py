@@ -2,37 +2,37 @@ from GraphStruct import create_example_graph, count_routes, SimpleGraph
 from Display import show_all_heuristics, show_colorful
 
 
-# Example A: existing example graph
+# Exemple A : graphe d'exemple existant
 g = create_example_graph()
-print("Example graph: show colorful output and count routes")
+print("Graphe d'exemple : affichage coloré et nombre de routes")
 show_colorful(g)
 print("Nombre de routes de 1 à 11 :", count_routes(g, 1, 11))
 
 
-# Example B: construct from an edge list (flexible formats)
+# Exemple B : construction à partir d'une liste d'arêtes (formats flexibles)
 edge_list = [
-	("A", "B", 2, 5),
-	("B", "C", 3),        # single weight -> both tmin=tmax
-	("C", "D"),         # no weights -> uses default
+    ("A", "B", 2, 5),
+    ("B", "C", 3),        # poids unique -> tmin = tmax
+    ("C", "D"),           # pas de poids -> utilise la valeur par défaut
 ]
 g2 = SimpleGraph.from_edge_list(edge_list, directed=True, default_weight=(1, 1))
-print("Constructed graph from edge list with nodes:", g2.nodes())
+print("Graphe construit depuis la liste d'arêtes, noeuds :", g2.nodes())
 show_colorful(g2)
 
 
-# Example C: build from an adjacency dict
+# Exemple C : construction à partir d'un dictionnaire d'adjacence
 adj = {
-	"x": {"y": (3, 7), "z": 4},  # mixed tuple and scalar
-	"y": {"z": (2, 6)},
+    "x": {"y": (3, 7), "z": 4},  # mélange tuple et scalaire
+    "y": {"z": (2, 6)},
 }
 g3 = SimpleGraph.from_adj_dict(adj, directed=False)
-print("Graph from adj dict edges:", g3.edges())
+print("Graphe depuis dict d'adjacence, arêtes :", g3.edges())
 show_colorful(g3)
 
 
-# Optionally relabel to consecutive integers (useful for some algorithms/visualizers)
+# Optionnel : renommer en entiers consécutifs (utile pour certains algorithmes/visualiseurs)
 g3_int, mapping = g3.relabel_to_ints(start=1)
-print("Relabeled nodes mapping:", mapping)
+print("Renommage des noeuds :", mapping)
 
 
 #========================================= interactive HTML display ======================================
