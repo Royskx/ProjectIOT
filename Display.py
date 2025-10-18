@@ -135,7 +135,7 @@ def create_interactive_dashboard(graph, start, end, port=8050):
         if selected_heuristic == 'gaussian' and heuristics.get('gaussian'):
             current_graph = heuristics['gaussian'].get('graph', graph)
         
-        if selected_heuristic == 'beat' and heuristics.get('beta'):
+        if selected_heuristic == 'beta' and heuristics.get('beta'):
             current_graph = heuristics['beta'].get('graph', graph)
         # Nodes
         for node in current_graph.adj:
@@ -164,7 +164,10 @@ def create_interactive_dashboard(graph, start, end, port=8050):
                     continue
                 
                 # Pour Gaussian, afficher la moyenne estimée
-                if selected_heuristic == 'gaussian' and abs(tmin - tmax) < 0.01:
+                # Graphes convergés ont tmin ≈ tmax
+                is_converged = selected_heuristic in ['gaussian', 'beta']
+
+                if is_converged and abs(tmin - tmax) < 0.01:
                     label = f"{tmin:.2f}"
                 else:
                     label = f"{tmin}-{tmax}"

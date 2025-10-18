@@ -131,9 +131,9 @@ class SimpleGraph:
             travel_time = tmin + beta_sample * (tmax - tmin)
             observed_times.append(travel_time)
             
-            if moment % liberation_every == 0:
-                alpha += np.abs(alpha_start - alpha) * liberation_force
-                beta += np.abs(beta_start - beta) * liberation_force
+            if moment > 0 and moment % liberation_every == 0:
+                alpha -= (alpha - alpha_start) * liberation_force
+                beta -= (beta - beta_start) * liberation_force
             
             progress = moment / n_samples
             alpha += (alpha_limit - alpha) * congestion_speed * 0.01
