@@ -70,17 +70,6 @@ def create_interactive_dashboard(graph, start, end, port=8050):
     except:
         heuristics['worst'] = None
     
-    try:
-        path, val = most_stable_path(graph, start, end)
-        heuristics['most_stable'] = {
-            'name': '🎯 Plus stable (Non-Abstract)',
-            'path': path,
-            'value': val,
-            'description': f'Marge minimale: {val:.2f} min'
-        }
-    except:
-        heuristics['most_stable'] = None
-    
     # Graphe moyen si disponible
     g_mean = None
     try:
