@@ -1,5 +1,5 @@
 import heapq
-from GraphStruct import Simple
+from GraphStruct import SimpleGraph
 #heapq is a mini-python implementation of the heap structur which is etremely efficient to
 #estabilish the order in the Dijekstra's algorithm.
 
