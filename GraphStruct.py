@@ -13,7 +13,7 @@ class SimpleGraph:
     """
     def __init__(self, directed=False):
         self.directed = directed
-        self.adj = {}  # {node: {neighbor: (temps_min, temps_max)}}
+        self.adj = {}
 
     def add_node(self, v):
         if v not in self.adj:
