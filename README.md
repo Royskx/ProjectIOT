@@ -1,8 +1,5 @@
 # Robustesse dans les graphes
-Vous trouverez le lien au document de réponses ci-dessous :
-
-**Format .DOCX**  
-https://docs.google.com/document/d/1FkdVHkOsLSLxm0ZnttG3Ms8LlBLZvWaAbwbzPVxLCf8/edit?usp=sharing
+Vous trouverez le document de réponses en format pdf sous le nom "Rendu_Projet_Graphes.pdf".
 
 ---
 
