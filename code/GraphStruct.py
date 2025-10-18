@@ -15,6 +15,17 @@ class SimpleGraph:
 
     def add_edge(self, u, v, temps_min, temps_max):
         """Ajoute une arête u->v avec deux poids (temps_min, temps_max)."""
+        # Validate and normalize weights so temps_min <= temps_max
+        try:
+            # allow types that support comparison (numbers)
+            if temps_min is None or temps_max is None:
+                raise TypeError('temps_min and temps_max must be numeric and not None')
+            if temps_min > temps_max:
+                # swap to ensure order
+                temps_min, temps_max = temps_max, temps_min
+        except TypeError:
+            raise TypeError('temps_min and temps_max must be comparable numeric values')
+
         self.add_node(u)
         self.add_node(v)
         self.adj[u][v] = (temps_min, temps_max)
@@ -261,6 +272,7 @@ class SimpleGraph:
         for u, v, tmin, tmax in self.edges():
             g.add_edge(mapping[u], mapping[v], tmin, tmax)
         return g, mapping
+
             
 
 def create_example_graph():
