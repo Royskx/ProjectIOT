@@ -57,6 +57,8 @@ g.draw_dash(port=8050, path=path, heuristic_name="Stable Path", path_length=val)
 '''
 
 show_all_heuristics(g, 1, 11, port=8050)
+
+
 #g = create_example_graph()
 #g.show_colorful()
 ##g.draw_plotly()
