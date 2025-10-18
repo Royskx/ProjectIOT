@@ -28,11 +28,34 @@ adj = {
 g3 = SimpleGraph.from_adj_dict(adj, directed=False)
 print("Graphe depuis dict d'adjacence, arêtes :", g3.edges())
 show_colorful(g3)
-
-
 # Optionnel : renommer en entiers consécutifs (utile pour certains algorithmes/visualiseurs)
 g3_int, mapping = g3.relabel_to_ints(start=1)
 print("Renommage des noeuds :", mapping)
+
+# --- Optional: demonstrate loading graphs from files if present ---
+import os
+here = os.path.dirname(__file__)
+csv_path = os.path.join(here, 'example_edges.csv')
+json_path = os.path.join(here, 'example_graph.json')
+edgelist_path = os.path.join(here, 'example_edgelist.txt')
+
+if os.path.exists(csv_path):
+    print('Loading graph from CSV:', csv_path)
+    gf = SimpleGraph.from_csv(csv_path, has_header=True)
+    print('Loaded', len(gf.nodes()), 'nodes from CSV')
+elif os.path.exists(json_path):
+    print('Loading graph from JSON:', json_path)
+    gf = SimpleGraph.from_json(json_path)
+    print('Loaded', len(gf.nodes()), 'nodes from JSON')
+elif os.path.exists(edgelist_path):
+    print('Loading graph from edge-list file:', edgelist_path)
+    gf = SimpleGraph.from_edgelist_file(edgelist_path)
+    print('Loaded', len(gf.nodes()), 'nodes from edge-list')
+else:
+    print('No example graph files found (put example_edges.csv, example_graph.json or example_edgelist.txt in code/)')
+
+
+
 
 
 #========================================= interactive HTML display ======================================
