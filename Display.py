@@ -87,7 +87,7 @@ def create_interactive_dashboard(graph, start, end, port=8050):
         g_mean = graph.make_converge(n_samples=1000)
         path, val = best_path(g_mean, start, end, cost_min, maximize=False)
         heuristics['gaussian'] = {
-            'name': '📊 Gaussien (moyenne empirique)',
+            'name': '📊 Gaussian Distribution',
             'path': path,
             'value': val,
             'description': f'Temps moyen convergé: {val:.2f} min',
@@ -95,7 +95,20 @@ def create_interactive_dashboard(graph, start, end, port=8050):
         }
     except:
         heuristics['gaussian'] = None
-    
+        
+    try:
+        g_mean = graph.make_converge(beta = True, n_samples=1000)
+        path, val = best_path(g_mean, start, end, cost_min, maximize=False)
+        heuristics['beta'] = {
+            'name': '📊 Beta Distribution',
+            'path': path,
+            'value': val,
+            'description': f'Temps moyen convergé: {val:.2f} min',
+            'graph': g_mean  # Garder le graphe modifié
+        }
+    except:
+        heuristics['beta'] = None
+        
     def get_cytoscape_elements(selected_heuristic):
         """Génère les éléments Cytoscape avec le chemin coloré"""
         elements = []
@@ -105,6 +118,8 @@ def create_interactive_dashboard(graph, start, end, port=8050):
         if selected_heuristic == 'gaussian' and heuristics.get('gaussian'):
             current_graph = heuristics['gaussian'].get('graph', graph)
         
+        if selected_heuristic == 'beat' and heuristics.get('beta'):
+            current_graph = heuristics['beta'].get('graph', graph)
         # Nodes
         for node in current_graph.adj:
             elements.append({"data": {"id": str(node), "label": str(node)}})

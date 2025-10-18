@@ -93,7 +93,7 @@ class SimpleGraph:
 
         print(f"{GREEN}Sommets:{RESET} {len(self.nodes())} | {GREEN}Arêtes:{RESET} {len(self.edges())}\n")
     
-    def noisy_edge_mean(self, tmin, tmax, noise_scale=1.0, n_samples=1000):
+    def noisy_edge_mean_gauss(self, tmin, tmax, noise_scale=1.0, n_samples=1000):
         """
         Utilise Beta pour créer des gaussiennes décentrées de façon contrôlée
         """
@@ -109,7 +109,7 @@ class SimpleGraph:
         else:
             # Normal → pic au centre
             alpha, beta = 2, 2
-        
+
         # Générer la position du centre
         beta_sample = np.random.beta(alpha, beta)
         mu = tmin + beta_sample * (tmax - tmin)
@@ -126,7 +126,64 @@ class SimpleGraph:
         
         return np.mean(samples)
 
-    def make_converge(self, n_samples=1000):
+    def noisy_edge_mean_beta(self, tmin, tmax, n_samples=1000, 
+                    congestion_speed=0.1, liberation_every=100, liberation_force=0.3):
+    
+        """
+        Simule une route i.i.d avec du trafic qui évolue dans le temps.
+        
+        Imagine : tu observes cette route pendant 1000 moments différents.
+        Le trafic s'accumule progressivement, puis se libère de temps en temps.
+        
+        Paramètres:
+        -----------
+        tmin, tmax : temps min et max du trajet (en minutes par exemple)
+        n_samples : combien de "moments" on observe
+        congestion_speed : vitesse d'accumulation du trafic (0.0 = aucune, 1.0 = rapide)
+        liberation_every : tous les combien de moments la route se libère
+        liberation_force : intensité de la libération (0.0 = aucune, 1.0 = complète)
+        """
+    
+        initial_state = np.random.choice(['fluide', 'normal', 'dense'])
+        
+        if initial_state == 'fluide':
+            alpha_start, beta_start = 2, 5
+            alpha_limit, beta_limit = 5, 2
+        elif initial_state == 'dense':
+            alpha_start, beta_start = 5, 2
+            alpha_limit, beta_limit = 2, 5
+        else:
+            alpha_start, beta_start = 2, 2
+            alpha_limit, beta_limit = 3, 3
+        
+        observed_times = []
+        alpha = alpha_start
+        beta = beta_start
+        
+        for moment in range(n_samples):     
+            beta_sample = np.random.beta(alpha, beta)
+            travel_time = tmin + beta_sample * (tmax - tmin)
+            observed_times.append(travel_time)
+            
+            if moment % liberation_every == 0:
+                alpha += np.abs(alpha_start - alpha) * liberation_force
+                beta += np.abs(beta_start - beta) * liberation_force
+            
+            progress = moment / n_samples
+            alpha += (alpha_limit - alpha) * congestion_speed * 0.01
+            beta += (beta_limit - beta) * congestion_speed * 0.01
+            
+            alpha = np.clip(alpha, 0.5, 10)
+            beta = np.clip(beta, 0.5, 10)
+        
+        valid_times = [t for t in observed_times if tmin <= t <= tmax]
+        
+        if len(valid_times) == 0:
+            return (tmin + tmax) / 2
+        
+        return np.mean(valid_times)
+
+    def make_converge(self, beta = False, n_samples=1000):
         """
         Pour chaque arête, crée une gaussienne bruitée et estime la moyenne empirique,
         puis crée un nouveau graphe avec ces valeurs.
@@ -135,7 +192,10 @@ class SimpleGraph:
         noise_scale = np.random.uniform(0, 0.5)
 
         for u, v, tmin, tmax in self.edges():
-            mean_estimee = self.noisy_edge_mean(tmin, tmax, noise_scale, n_samples)
+            if beta:
+                mean_estimee = self.noisy_edge_mean_beta(tmin, tmax, n_samples)
+            else:
+                mean_estimee = self.noisy_edge_mean_gauss(tmin, tmax, noise_scale, n_samples)
             g.add_node(u)
             g.add_node(v)
             g.add_edge(u, v, round(mean_estimee,2), round(mean_estimee,2))
